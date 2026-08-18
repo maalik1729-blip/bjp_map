@@ -3,7 +3,6 @@ import { Map3D } from './Map3D'
 import { DistrictTooltip } from './DistrictTooltip'
 import { useDistrictGeometry } from './useDistrictGeometry'
 import { buildCountLookup, normalizeDistrictName } from './districtIndex'
-import { COLOR_SCALE } from './districtColorScale'
 import '../../styles/tn-map.css'
 
 export default function Map3DContainer({
@@ -74,7 +73,7 @@ export default function Map3DContainer({
   }
 
   return (
-    <div ref={containerRef} className="tn-map-wrapper" style={{ height: 530 }}>
+    <div ref={containerRef} className="tn-map-wrapper" style={{ height: 560, background: '#fdf6ee' }}>
       {loading && (
         <div className="tn-map-loading">
           <div className="tn-map-spinner" />
@@ -103,27 +102,46 @@ export default function Map3DContainer({
 
           <DistrictTooltip tooltip={tooltip} />
 
-          {/* Reset Camera Button */}
-          <button
-            className="tn-3d-toggle"
-            onClick={resetView}
-            title="Reset 3D Camera Angle"
-          >
-            🎥 Reset 3D View
-          </button>
+          {/* Floating Subtle Reset View Control */}
+          <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 900, display: 'flex', gap: 8 }}>
+            <button
+              onClick={resetView}
+              className="btn btn-sm btn-light"
+              style={{
+                borderRadius: 20,
+                fontSize: 12,
+                fontWeight: 700,
+                color: '#e65100',
+                background: '#ffffff',
+                border: '1px solid rgba(230, 81, 0, 0.25)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                padding: '5px 12px',
+              }}
+              title="Reset 3D Map Perspective"
+            >
+              ↺ Reset 3D View
+            </button>
+          </div>
 
-          {/* Saffron Legend */}
-          <div className="tn-map-legend">
-            <div className="tn-legend-title">Applications</div>
-            {COLOR_SCALE.map(({ color, label }) => (
-              <div key={label} className="tn-legend-row">
-                <span className="tn-legend-dot" style={{ background: color }} />
-                <span className="tn-legend-text">{label}</span>
-              </div>
-            ))}
-            <div style={{ fontSize: 9, color: '#9e9e9e', marginTop: 6, lineHeight: 1.4 }}>
-              ↑ Height = 3D Extrusion
-            </div>
+          {/* District 3D Hint Badge */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 12,
+              left: 12,
+              zIndex: 900,
+              background: 'rgba(255, 255, 255, 0.92)',
+              backdropFilter: 'blur(6px)',
+              border: '1px solid rgba(247, 98, 1, 0.15)',
+              borderRadius: 10,
+              padding: '6px 12px',
+              fontSize: 11,
+              fontWeight: 600,
+              color: '#666',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+            }}
+          >
+            🖱️ Drag to rotate 3D • Scroll to zoom • Click district to filter
           </div>
 
           {/* Selected District Badge */}

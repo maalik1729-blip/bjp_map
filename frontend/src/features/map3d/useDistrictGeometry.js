@@ -28,6 +28,9 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
       const coords = feature.geometry.coordinates
 
       const shapes = []
+      let totalX = 0
+      let totalY = 0
+      let pointCount = 0
 
       function processPolygon(rings) {
         if (!rings || rings.length === 0) return
@@ -38,12 +41,15 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
 
         outerRing.forEach((pt, i) => {
           const [px, py] = projection(pt)
-          // Center projection coordinates around origin [0,0] and flip Y for 3D coordinate space
           const x = px - SCENE_WIDTH / 2
           const y = -(py - SCENE_HEIGHT / 2)
 
           if (i === 0) shape.moveTo(x, y)
           else shape.lineTo(x, y)
+
+          totalX += x
+          totalY += y
+          pointCount++
         })
 
         // Inner holes (if any)
@@ -70,23 +76,28 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
       }
 
       if (shapes.length > 0) {
-        // Extrude settings for 3D pucks with beveled edges
+        // High quality Extrude settings for 3D block look
         const extrudeSettings = {
           depth: depth,
           bevelEnabled: true,
-          bevelSegments: 2,
-          steps: 1,
-          bevelSize: 0.04,
-          bevelThickness: 0.04,
+          bevelSegments: 3,
+          steps: 2,
+          bevelSize: 0.05,
+          bevelThickness: 0.05,
         }
 
         const geometries = shapes.map(s => new THREE.ExtrudeGeometry(s, extrudeSettings))
+        const centroid = [
+          pointCount > 0 ? totalX / pointCount : 0,
+          pointCount > 0 ? totalY / pointCount : 0,
+        ]
 
         districts.push({
           id: normName,
           name: rawName,
           count,
           depth,
+          centroid,
           shapes,
           geometries,
         })
