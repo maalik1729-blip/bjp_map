@@ -147,8 +147,20 @@ export async function getDistrictAnalytics(req, res) {
     const col = getAppDb().collection('applications')
     const pipeline = [
       {
+        $project: {
+          district: {
+            $ifNull: ['$voter.district', { $ifNull: ['$voter.DISTRICT', '$local_body.district'] }]
+          }
+        }
+      },
+      {
+        $match: {
+          district: { $exists: true, $ne: null, $ne: '' }
+        }
+      },
+      {
         $group: {
-          _id: '$voter.district',
+          _id: '$district',
           count: { $sum: 1 }
         }
       },
@@ -159,7 +171,9 @@ export async function getDistrictAnalytics(req, res) {
     let total = 0
     rows.forEach(r => {
       if (r._id) {
-        districtCounts[r._id] = r.count
+        // Normalize key to Title Case for clean presentation
+        const cleanName = String(r._id).trim()
+        districtCounts[cleanName] = (districtCounts[cleanName] || 0) + r.count
         total += r.count
       }
     })
