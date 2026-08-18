@@ -8,10 +8,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
     "@sentry/react": "^8.18.0",
     "axios": "^1.6.2",
     "chart.js": "^4.5.1",
     "cropperjs": "^1.6.2",
+    "d3-geo": "^3.1.1",
+    "d3-scale": "^4.0.2",
     "html2canvas": "^1.4.1",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^6.4.0",
@@ -20,7 +24,8 @@
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^18.2.0",
     "react-leaflet": "^4.2.1",
-    "react-router-dom": "^6.20.1"
+    "react-router-dom": "^6.20.1",
+    "three": "^0.160.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

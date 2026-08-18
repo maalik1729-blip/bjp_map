@@ -18,7 +18,7 @@ import { admin } from '../../api'
 import '../../styles/admin.css'
 import '../../styles/tn-map.css'
 
-const TamilNaduMap = lazy(() => import('../../components/TamilNadu3DMap'))
+const TamilNaduMap = lazy(() => import('../../features/map3d/Map3DContainer'))
 
 ChartJS.register(
   CategoryScale,
