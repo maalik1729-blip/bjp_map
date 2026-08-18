@@ -71,6 +71,14 @@ export default function DashboardPage() {
         if (data && data.district_counts) setDistrictCounts(data.district_counts)
       })
       .catch(() => {}) // non-fatal
+
+    admin.getSession()
+      .then((sess) => {
+        if (sess && sess.role === 'district_admin' && sess.assigned_district) {
+          setSelectedDistrict(sess.assigned_district)
+        }
+      })
+      .catch(() => {})
   }, [])
 
   // When selectedDistrict changes, filter recent applications

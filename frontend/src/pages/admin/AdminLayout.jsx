@@ -15,10 +15,17 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768)
   const [timeStr, setTimeStr]         = useState('')
 
+  const [sessionUser, setSessionUser] = useState('admin')
+  const [sessionRole, setSessionRole] = useState('super_admin')
+  const [sessionDistrict, setSessionDistrict] = useState(null)
+
   useEffect(() => {
     admin.getSession()
       .then((data) => {
         if (data && data.success === true) {
+          setSessionUser(data.user || 'admin')
+          setSessionRole(data.role || 'super_admin')
+          setSessionDistrict(data.assigned_district || null)
           setChecking(false)
         } else {
           navigate('/admin/login', { replace: true })
@@ -115,8 +122,10 @@ export default function AdminLayout() {
                 <i className="bi bi-person-fill" />
               </div>
               <div className="admin-user-info">
-                <span className="admin-name">Admin User</span>
-                <span className="admin-role">Super Admin</span>
+                <span className="admin-name">{sessionUser}</span>
+                <span className="admin-role">
+                  {sessionRole === 'super_admin' ? 'Super Admin' : sessionRole === 'state_admin' ? 'State Admin' : `District Admin: ${sessionDistrict || ''}`}
+                </span>
               </div>
             </div>
           </div>

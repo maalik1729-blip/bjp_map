@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { admin } from '../../api'
+import EditApplicationModal from '../../components/EditApplicationModal'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import '../../styles/admin.css'
 
 function DetailRow({ icon, label, value }) {
@@ -33,16 +35,29 @@ export default function ApplicationDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const [app, setApp] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [userRole, setUserRole] = useState('district_admin')
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
-  useEffect(() => {
+  const reloadApp = () => {
+    setLoading(true)
     admin
       .getApplication(id)
       .then((res) => setApp(res.application))
       .catch((err) => setError(err?.message || 'Failed to load application details.'))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    reloadApp()
+    admin.getSession()
+      .then((res) => {
+        if (res.success) setUserRole(res.role || 'super_admin')
+      })
+      .catch(() => {})
   }, [id])
+
+  const canEditOrDelete = userRole === 'super_admin' || userRole === 'state_admin'
 
   const handlePrint = () => {
     window.print()
@@ -158,7 +173,27 @@ export default function ApplicationDetailPage() {
           </div>
         </div>
 
-        <div className="detail-actions">
+        <div className="detail-actions d-flex align-items-center gap-2 flex-wrap">
+          {canEditOrDelete && (
+            <>
+              <button
+                type="button"
+                className="btn btn-outline-primary fw-semibold px-3"
+                style={{ borderRadius: 8, fontSize: 13 }}
+                onClick={() => setShowEditModal(true)}
+              >
+                ✏️ Edit Details
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-danger fw-semibold px-3"
+                style={{ borderRadius: 8, fontSize: 13 }}
+                onClick={() => setShowDeleteModal(true)}
+              >
+                🗑️ Delete
+              </button>
+            </>
+          )}
           <button type="button" className="btn-print-card" onClick={handlePrint}>
             <i className="bi bi-printer-fill" /> Print Record
           </button>
@@ -488,6 +523,24 @@ export default function ApplicationDetailPage() {
           </DetailSection>
         )}
       </div>
+
+      {/* Edit Application Modal */}
+      {showEditModal && (
+        <EditApplicationModal
+          application={app}
+          onClose={() => setShowEditModal(false)}
+          onUpdated={reloadApp}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <DeleteConfirmModal
+          application={app}
+          onClose={() => setShowDeleteModal(false)}
+          onDeleted={() => navigate('/admin/applications')}
+        />
+      )}
     </div>
   )
 }

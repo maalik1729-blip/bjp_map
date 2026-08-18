@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { admin } from '../../api'
+import EditApplicationModal from '../../components/EditApplicationModal'
+import DeleteConfirmModal from '../../components/DeleteConfirmModal'
 import '../../styles/admin.css'
 
 const PER_PAGE = 15
@@ -41,6 +43,29 @@ export default function ApplicationsPage() {
   const [query, setQuery] = useState('')
   const [bodyTypeFilter, setBodyTypeFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+
+  // Auth / Role State
+  const [currentUser, setCurrentUser] = useState(null)
+  const [userRole, setUserRole] = useState('district_admin')
+  const [assignedDistrict, setAssignedDistrict] = useState(null)
+
+  // Modals state
+  const [editingApp, setEditingApp] = useState(null)
+  const [deletingApp, setDeletingApp] = useState(null)
+
+  useEffect(() => {
+    admin.getSession()
+      .then((res) => {
+        if (res.success) {
+          setCurrentUser(res.user)
+          setUserRole(res.role || 'super_admin')
+          setAssignedDistrict(res.assigned_district || null)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const canEditOrDelete = userRole === 'super_admin' || userRole === 'state_admin'
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -108,11 +133,25 @@ export default function ApplicationsPage() {
     <div className="admin-applications-view">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
         <div>
-          <h1>
-            <i className="bi bi-card-checklist me-2 text-saffron" />
-            Candidate Applications Registry
-          </h1>
-          <p>Search, filter, and manage all BJP Local Body Candidate submissions</p>
+          <div className="d-flex align-items-center gap-2 mb-1">
+            <h1>
+              <i className="bi bi-card-checklist me-2 text-saffron" />
+              Candidate Applications Registry
+            </h1>
+            {userRole && (
+              <span
+                className={`badge ${userRole === 'super_admin' ? 'bg-danger' : userRole === 'state_admin' ? 'bg-warning text-dark' : 'bg-info text-dark'}`}
+                style={{ fontSize: 11, padding: '5px 10px', textTransform: 'uppercase' }}
+              >
+                {userRole.replace('_', ' ')} {assignedDistrict ? `(${assignedDistrict})` : ''}
+              </span>
+            )}
+          </div>
+          <p>
+            {assignedDistrict
+              ? `Displaying candidate applications restricted to ${assignedDistrict} district.`
+              : 'Search, filter, edit, and manage all BJP Local Body Candidate submissions state-wide.'}
+          </p>
         </div>
         <button
           type="button"
@@ -197,7 +236,7 @@ export default function ApplicationsPage() {
                     <th>Body Type</th>
                     <th>Position Preferences</th>
                     <th>Submitted Date</th>
-                    <th>Action</th>
+                    <th style={{ minWidth: 160 }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -205,12 +244,15 @@ export default function ApplicationsPage() {
                     <tr
                       key={a.application_id}
                       className="table-row-hover"
-                      onClick={() => navigate(`/admin/applications/${a.application_id}`)}
                     >
-                      <td>
+                      <td onClick={() => navigate(`/admin/applications/${a.application_id}`)}>
                         <span className="app-id-pill">{a.application_id}</span>
                       </td>
-                      <td className="fw-bold" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <td
+                        className="fw-bold"
+                        style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                        onClick={() => navigate(`/admin/applications/${a.application_id}`)}
+                      >
                         <img
                           src={a.photo_url || a.photoUrl || '/bjp_logo.png'}
                           alt="Candidate Avatar"
@@ -239,7 +281,7 @@ export default function ApplicationsPage() {
                         </span>
                       </td>
                       <td
-                        style={{ maxWidth: 220, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                         title={positionText(a)}
                       >
                         {positionText(a) || '—'}
@@ -256,16 +298,48 @@ export default function ApplicationsPage() {
                           : '—'}
                       </td>
                       <td>
-                        <button
-                          type="button"
-                          className="btn-table-action"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            navigate(`/admin/applications/${a.application_id}`)
-                          }}
-                        >
-                          <i className="bi bi-eye-fill" /> Details
-                        </button>
+                        <div className="d-flex align-items-center gap-1">
+                          <button
+                            type="button"
+                            className="btn-table-action btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/admin/applications/${a.application_id}`)
+                            }}
+                            title="View Full Profile"
+                          >
+                            <i className="bi bi-eye-fill" /> View
+                          </button>
+
+                          {canEditOrDelete && (
+                            <>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-primary px-2"
+                                style={{ borderRadius: 6, fontSize: 12 }}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setEditingApp(a)
+                                }}
+                                title="Edit Candidate Data"
+                              >
+                                ✏️ Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-danger px-2"
+                                style={{ borderRadius: 6, fontSize: 12 }}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setDeletingApp(a)
+                                }}
+                                title="Delete Candidate Application"
+                              >
+                                🗑️
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -276,6 +350,24 @@ export default function ApplicationsPage() {
           </>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {editingApp && (
+        <EditApplicationModal
+          application={editingApp}
+          onClose={() => setEditingApp(null)}
+          onUpdated={load}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingApp && (
+        <DeleteConfirmModal
+          application={deletingApp}
+          onClose={() => setDeletingApp(null)}
+          onDeleted={load}
+        />
+      )}
     </div>
   )
 }

@@ -112,6 +112,12 @@ export const admin = {
   getApplication: (id) =>
     api.get(`/admin/api/applications/${id}`),
 
+  updateApplication: (id, data) =>
+    api.put(`/admin/api/applications/${id}`, data),
+
+  deleteApplication: (id) =>
+    api.delete(`/admin/api/applications/${id}`),
+
   updatePhoto: (id, formData) =>
     api.post(`/admin/api/applications/${id}/photo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
