@@ -76,14 +76,14 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
       }
 
       if (shapes.length > 0) {
-        // High quality Extrude settings for 3D block look
+        // High performance 3D Extrude settings
         const extrudeSettings = {
           depth: depth,
           bevelEnabled: true,
-          bevelSegments: 3,
-          steps: 2,
-          bevelSize: 0.05,
-          bevelThickness: 0.05,
+          bevelSegments: 1,
+          steps: 1,
+          bevelSize: 0.03,
+          bevelThickness: 0.03,
         }
 
         const geometries = shapes.map(s => new THREE.ExtrudeGeometry(s, extrudeSettings))

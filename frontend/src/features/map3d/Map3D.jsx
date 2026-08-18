@@ -16,32 +16,14 @@ function SceneContent({
 
   return (
     <>
-      {/* Studio Lighting to illuminate the front face and extruded 3D side walls */}
-      <ambientLight intensity={1.1} color="#ffffff" />
-      
-      {/* Key Light (Top-Left) creates soft depth and shadows on the side walls */}
-      <directionalLight
-        position={[-12, 18, 22]}
-        intensity={1.6}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0001}
-      />
+      {/* High Performance Lighting Setup */}
+      <ambientLight intensity={1.15} color="#ffffff" />
+      <directionalLight position={[-10, 16, 20]} intensity={1.4} />
+      <directionalLight position={[12, -10, 14]} intensity={0.5} color="#ffe5d9" />
+      <pointLight position={[0, 0, 18]} intensity={0.4} />
 
-      {/* Fill Light (Bottom-Right) */}
-      <directionalLight position={[14, -12, 16]} intensity={0.6} color="#ffe5d9" />
-      
-      {/* Front Soft Spot */}
-      <pointLight position={[0, 0, 20]} intensity={0.5} color="#ffffff" />
-
-      {/* 3D Tamil Nadu Map - Front-facing with slight isometric tilt like the reference photo */}
+      {/* 3D Tamil Nadu Map - Front-facing with slight isometric tilt */}
       <group rotation={[-0.22, 0.15, -0.02]}>
-        {/* Soft Background Plate */}
-        <mesh position={[0, 0, -0.2]} receiveShadow>
-          <planeGeometry args={[36, 36]} />
-          <shadowMaterial opacity={0.15} />
-        </mesh>
-
         {/* 38 3D District Blocks */}
         {districts.map((d) => (
           <DistrictMesh
@@ -70,9 +52,12 @@ export function Map3D({
 }) {
   return (
     <Canvas
-      shadows
-      dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true }}
+      dpr={[1, 1.5]}
+      gl={{
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+      }}
       style={{ width: '100%', height: '100%', background: '#fdf6ee' }}
     >
       <PerspectiveCamera makeDefault position={[0, -0.5, 23]} fov={42} />
@@ -85,7 +70,7 @@ export function Map3D({
         maxPolarAngle={Math.PI / 1.7}
         minDistance={10}
         maxDistance={38}
-        dampingFactor={0.06}
+        dampingFactor={0.08}
       />
       <Suspense fallback={null}>
         <SceneContent

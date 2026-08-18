@@ -1,7 +1,4 @@
-import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
-import * as THREE from 'three'
 import { getDistrictColor } from './districtColorScale'
 
 export function DistrictMesh({
@@ -12,24 +9,10 @@ export function DistrictMesh({
   onPointerOut,
   onClick,
 }) {
-  const groupRef = useRef()
-  const targetZ = isHovered ? 0.45 : isSelected ? 0.3 : 0
-
-  // Smooth lerp hover lift effect along Z axis
-  useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.position.z = THREE.MathUtils.damp(
-        groupRef.current.position.z,
-        targetZ,
-        14,
-        delta
-      )
-    }
-  })
-
   const color = getDistrictColor(district.name, district.count, isHovered, isSelected)
   const [cx, cy] = district.centroid || [0, 0]
-  const textZ = district.depth + 0.08
+  const textZ = district.depth + 0.06
+  const posZ = isHovered ? 0.4 : isSelected ? 0.25 : 0
 
   // Shorten name if very long for clean 3D readability
   const displayName = district.name
@@ -41,7 +24,7 @@ export function DistrictMesh({
 
   return (
     <group
-      ref={groupRef}
+      position={[0, 0, posZ]}
       onPointerOver={(e) => {
         e.stopPropagation()
         onPointerOver(e, district)
@@ -56,42 +39,25 @@ export function DistrictMesh({
       }}
     >
       {district.geometries.map((geom, idx) => (
-        <group key={idx}>
-          {/* Main 3D Extruded Body */}
-          <mesh geometry={geom} castShadow receiveShadow>
-            <meshStandardMaterial
-              color={color}
-              roughness={0.4}
-              metalness={0.1}
-              envMapIntensity={0.6}
-            />
-          </mesh>
-
-          {/* Crisp Top Edge Outline */}
-          <lineSegments>
-            <edgesGeometry args={[geom, 28]} />
-            <lineBasicMaterial
-              color={isSelected ? '#ffffff' : isHovered ? '#ffffff' : '#333333'}
-              linewidth={1}
-              transparent
-              opacity={isHovered || isSelected ? 0.95 : 0.25}
-            />
-          </lineSegments>
-        </group>
+        <mesh key={idx} geometry={geom}>
+          <meshStandardMaterial
+            color={color}
+            roughness={0.4}
+            metalness={0.12}
+          />
+        </mesh>
       ))}
 
       {/* 3D District Name Label printed on top of the block */}
       <Text
         position={[cx, cy, textZ]}
         fontSize={0.34}
-        color={isSelected ? '#ffffff' : '#1a1a1a'}
+        color={isSelected ? '#ffffff' : '#222222'}
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.035}
+        outlineWidth={0.03}
         outlineColor={isSelected ? '#000000' : '#ffffff'}
-        outlineOpacity={0.9}
         fontWeight="bold"
-        letterSpacing={0.02}
       >
         {displayName}
       </Text>
