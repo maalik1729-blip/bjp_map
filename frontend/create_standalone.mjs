@@ -139,7 +139,7 @@ export default function TamilNadu3DMap({
       const geomType = feature.geometry.type
       const coords = feature.geometry.coordinates
       const shapes = []
-      let totalX = 0, totalY = 0, pointCount = 0
+      let totalX = 0, totalY = 0, totalLng = 0, totalLat = 0, pointCount = 0
 
       function processPolygon(rings) {
         if (!rings || !rings.length) return
@@ -152,6 +152,8 @@ export default function TamilNadu3DMap({
           else shape.lineTo(x, y)
           totalX += x
           totalY += y
+          totalLng += pt[0]
+          totalLat += pt[1]
           pointCount++
         })
         for (let h = 1; h < rings.length; h++) {
@@ -185,7 +187,9 @@ export default function TamilNadu3DMap({
           pointCount > 0 ? totalX / pointCount : 0,
           pointCount > 0 ? totalY / pointCount : 0,
         ]
-        list.push({ id: normName, name: rawName, count, depth, centroid, geometries })
+        const lat = pointCount > 0 ? Number((totalLat / pointCount).toFixed(3)) : 0
+        const lng = pointCount > 0 ? Number((totalLng / pointCount).toFixed(3)) : 0
+        list.push({ id: normName, name: rawName, count, depth, centroid, lat, lng, geometries })
       }
     })
     return list
@@ -272,24 +276,30 @@ export default function TamilNadu3DMap({
           style={{
             position: 'absolute',
             left: tooltip.x + 14,
-            top: tooltip.y - 65,
+            top: tooltip.y - 75,
             pointerEvents: 'none',
             zIndex: 1000,
-            background: 'rgba(29, 30, 28, 0.93)',
+            background: 'rgba(24, 25, 26, 0.95)',
             backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(247, 98, 1, 0.4)',
+            border: '1px solid rgba(247, 98, 1, 0.45)',
             borderRadius: 10,
             padding: '10px 14px',
-            minWidth: 160,
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+            minWidth: 170,
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
             color: '#fff',
           }}
         >
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>📍 {tooltip.district}</div>
+          <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 4 }}>📍 {tooltip.district}</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
             <span style={{ fontSize: 20, fontWeight: 800, color: '#f76201' }}>{tooltip.count.toLocaleString()}</span>
-            <span style={{ fontSize: 12, opacity: 0.7 }}> applications</span>
+            <span style={{ fontSize: 12, opacity: 0.75 }}> applications</span>
           </div>
+          {tooltip.lat && tooltip.lng && (
+            <div style={{ fontSize: 10.5, color: '#90caf9', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span>🌐</span>
+              <span style={{ fontWeight: 600 }}>{tooltip.lat}° N, {tooltip.lng}° E</span>
+            </div>
+          )}
         </div>
       )}
 

@@ -30,6 +30,8 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
       const shapes = []
       let totalX = 0
       let totalY = 0
+      let totalLng = 0
+      let totalLat = 0
       let pointCount = 0
 
       function processPolygon(rings) {
@@ -49,6 +51,8 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
 
           totalX += x
           totalY += y
+          totalLng += pt[0]
+          totalLat += pt[1]
           pointCount++
         })
 
@@ -92,12 +96,17 @@ export function useDistrictGeometry(geoData, countLookup = {}) {
           pointCount > 0 ? totalY / pointCount : 0,
         ]
 
+        const lat = pointCount > 0 ? Number((totalLat / pointCount).toFixed(3)) : 0
+        const lng = pointCount > 0 ? Number((totalLng / pointCount).toFixed(3)) : 0
+
         districts.push({
           id: normName,
           name: rawName,
           count,
           depth,
           centroid,
+          lat,
+          lng,
           shapes,
           geometries,
         })

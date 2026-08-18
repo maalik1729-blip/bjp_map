@@ -50,6 +50,8 @@ export default function Map3DContainer({
         y: e.clientY - rect.top,
         district: district.name,
         count: district.count,
+        lat: district.lat,
+        lng: district.lng,
       })
     }
   }
