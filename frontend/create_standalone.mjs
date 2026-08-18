@@ -35,17 +35,20 @@ export const TN_DISTRICTS = [
   'Ramanathapuram', 'Thoothukudi', 'Tenkasi', 'Tirunelveli', 'Kanyakumari'
 ]
 
-// ── 3. Color & Depth Scale Helpers ────────────────────────────────────
-const DISTRICT_PALETTE = [
-  '#f8b195', '#f67280', '#c06c84', '#6c5b7b', '#355c7d', '#99b898', '#feceab', '#ff847c',
-  '#e84a5f', '#4a9ea8', '#7bb0a6', '#f9d56e', '#f3c68f', '#ee99a0', '#8ec6c5', '#e27802',
-  '#6aa06a', '#d4a5a5', '#9b5de5', '#f15bb5', '#fee440', '#00bbf9', '#00f5d4'
-]
-
-function getDistrictBaseColor(name = '') {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  return DISTRICT_PALETTE[Math.abs(hash) % DISTRICT_PALETTE.length]
+// ── 3. Color & Depth Scale Helpers (38 Unique District Colors) ───────
+const DISTRICT_UNIQUE_COLORS = {
+  'chennai': '#fef08a', 'tiruvallur': '#fecdd3', 'kanchipuram': '#dcfce7', 'kancheepuram': '#dcfce7',
+  'chengalpattu': '#fed7aa', 'chengalpet': '#fed7aa', 'ranipet': '#bae6fd', 'vellore': '#ffedd5',
+  'tirupattur': '#bef264', 'krishnagiri': '#fbcfe8', 'dharmapuri': '#bbf7d0', 'tiruvannamalai': '#fef9c3',
+  'viluppuram': '#e0e7ff', 'kallakurichi': '#a7f3d0', 'salem': '#fef08a', 'namakkal': '#ddd6fe',
+  'perambalur': '#fed7aa', 'ariyalur': '#bae6fd', 'cuddalore': '#fecdd3', 'mayiladuthurai': '#99f6e4',
+  'nagapattinam': '#fef08a', 'tiruvarur': '#bef264', 'thanjavur': '#fed7aa', 'tiruchirappalli': '#fbcfe8',
+  'trichy': '#fbcfe8', 'karur': '#bef264', 'nilgiris': '#a7f3d0', 'the nilgiris': '#a7f3d0',
+  'erode': '#fef9c3', 'coimbatore': '#fed7aa', 'tiruppur': '#ddd6fe', 'dindigul': '#fef08a',
+  'pudukkottai': '#fed7aa', 'theni': '#c7d2fe', 'madurai': '#d9f99d', 'sivaganga': '#fecdd3',
+  'sivagangai': '#fecdd3', 'virudhunagar': '#fef08a', 'ramanathapuram': '#fed7aa', 'ramnad': '#fed7aa',
+  'thoothukudi': '#bef264', 'thoothukkudi': '#bef264', 'tenkasi': '#fdba74', 'tirunelveli': '#e0e7ff',
+  'kanyakumari': '#fbcfe8', 'kanniyakumari': '#fbcfe8'
 }
 
 function normalizeName(name = '') {
@@ -53,6 +56,11 @@ function normalizeName(name = '') {
     .replace('the nilgiris', 'nilgiris').replace('kanniyakumari', 'kanyakumari')
     .replace('sivagangai', 'sivaganga').replace('thiruvarur', 'tiruvarur')
     .replace('thoothukkudi', 'thoothukudi').replace('kanchipuram', 'kancheepuram')
+}
+
+function getDistrictBaseColor(name = '') {
+  const norm = normalizeName(name)
+  return DISTRICT_UNIQUE_COLORS[norm] || '#fde8d8'
 }
 
 // ── 4. Individual 3D District Mesh ────────────────────────────────────
